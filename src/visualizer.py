@@ -33,11 +33,11 @@ class SimulationVisualizer:
                            f'{val:.0f}t', ha='center', va='bottom', 
                            fontweight='bold', fontsize=11)
         
-        # 2. Annual CO₂ Emissions
+        # 2. Annual CO2 Emissions
         co2_data = [r['total_co2_tonnes'] for r in results]
         bars2 = axes[0, 1].bar(configs, co2_data, color=self.colors, edgecolor='black', linewidth=1.5)
-        axes[0, 1].set_title('Annual CO₂ Emissions', fontweight='bold', fontsize=14)
-        axes[0, 1].set_ylabel('CO₂ Emissions (tonnes/year)', fontsize=12)
+        axes[0, 1].set_title('Annual CO2 Emissions', fontweight='bold', fontsize=14)
+        axes[0, 1].set_ylabel('CO2 Emissions (tonnes/year)', fontsize=12)
         axes[0, 1].tick_params(axis='x', rotation=15)
         axes[0, 1].grid(axis='y', alpha=0.3)
         
@@ -109,9 +109,9 @@ class SimulationVisualizer:
         bars[baseline_idx].set_edgecolor('black')
         
         ax.axhline(y=0, color='black', linestyle='-', linewidth=1.5)
-        ax.set_title('CO₂ Emissions Reduction vs Baseline\n(Conventional Diesel-Mechanical)', 
+        ax.set_title('CO2 Emissions Reduction vs Baseline\n(Conventional Diesel-Mechanical)', 
                     fontsize=16, fontweight='bold', pad=20)
-        ax.set_ylabel('CO₂ Reduction (%)', fontsize=13)
+        ax.set_ylabel('CO2 Reduction (%)', fontsize=13)
         ax.tick_params(axis='x', rotation=15)
         ax.grid(axis='y', alpha=0.3)
         
