@@ -117,11 +117,11 @@ marine_propulsion_simulator/
 
 **Vessel:** Short-Sea Tanker  
 **Design Speed:** 14 knots @ 4500 kW  
-**Sailing Speed:** 12.5 knots (cubic interpolation → 3578 kW)
+**Sailing Speed:** 12.5 knots (cubic interpolation → 3200 kW)
 
 | Mode | Hours/Year | Propulsion | Electric Load |
 |------|------------|------------|---------------|
-| Sailing | 5,694 (65%) | 3578 kW | 700 kW |
+| Sailing | 5,694 (65%) | 3200 kW | 700 kW |
 | Maneuvering | 438 (5%) | 1000 kW | 1200 kW |
 | Port | 2,628 (30%) | 0 kW | 500 kW |
 
@@ -154,7 +154,7 @@ Fuel (kg) = Power (kW) × Hours (h) × SFOC (g/kWh) / 1000
 
 ```
 P_sailing = P_design × (V_sailing / V_design)³
-P_sailing = 4500 × (12.5 / 14)³ ≈ 3578 kW
+P_sailing = 4500 × (12.5 / 14)³ ≈ 3200 kW
 ```
 
 ### Emissions

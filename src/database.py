@@ -246,7 +246,7 @@ class VesselDatabase:
         ''')
         
         # =================================================================
-        # OPERATIONAL PROFILE: Short-Sea Tanker (Lorenzo's Assignment)
+        # OPERATIONAL PROFILE: Short-Sea Tanker (Interview Assignment)
         # =================================================================
         
         # Calculate sailing power using cubic interpolation
@@ -256,7 +256,7 @@ class VesselDatabase:
         
         # P_sailing = P_design × (V_sailing / V_design)³
         sailing_prop_power = design_power * (sailing_speed / design_speed) ** 3
-        # Result: 4500 × (12.5/14)³ ≈ 3578 kW
+        # Result: 4500 × (12.5/14)³ ≈ 3200 kW
         
         cursor.execute('''
             INSERT INTO operating_profiles VALUES (
