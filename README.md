@@ -23,7 +23,7 @@ This simulator evaluates three propulsion configurations for a short-sea tanker:
    - Main: Wärtsilä 8V31DF (4800 kW)
    - Aux: 2× Wärtsilä 8L20DF (1280 kW each)
    - Fuel: 95% LNG, 5% MDO backup
-   - SFOC: 157.5 g/kWh (gas mode), 176.9 g/kWh (diesel mode)
+   - SFOC: 149 g/kWh (gas mode), 176.9 g/kWh (diesel mode)
 
 3. **Diesel-Electric Hybrid**
    - Gensets: 4× Wärtsilä 8L20 (1600 kW each)

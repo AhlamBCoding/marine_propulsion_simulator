@@ -84,7 +84,7 @@ class DualFuelLNGPropulsion(PropulsionSystem):
     """
     Configuration B: Dual-Fuel LNG
     - Main: Wärtsilä 8V31DF (4800 kW)
-      - Gas mode: SFOC 157.5 g/kWh
+      - Gas mode: SFOC 149.0 g/kWh
       - Diesel mode: SFOC 176.9 g/kWh
     - Aux: 2× Wärtsilä 8L20DF (1280 kW)
       - Gas mode: SFOC 172.0 g/kWh
@@ -93,7 +93,7 @@ class DualFuelLNGPropulsion(PropulsionSystem):
     
     def __init__(self, config_data):
         super().__init__(config_data)
-        self.sfoc_gas = config_data['sfoc_gas']          # 157.5 g/kWh
+        self.sfoc_gas = config_data['sfoc_gas']          # 149.0 g/kWh
         self.sfoc_diesel = config_data['sfoc_diesel']    # 176.9 g/kWh
         self.lng_ratio = config_data['lng_ratio']        # 0.95
         self.pilot_fuel = config_data['pilot_fuel']      # 5.2 g/kWh
