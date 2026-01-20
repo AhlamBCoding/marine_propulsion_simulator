@@ -1,210 +1,292 @@
 import matplotlib.pyplot as plt
 import seaborn as sns
-import pandas as pd
 import numpy as np
 
 class SimulationVisualizer:
-    """Create visualizations for simulation results"""
+    """Create professional visualizations for propulsion system comparison"""
     
-    def __init__(self, style='darkgrid'):
+    def __init__(self, style='whitegrid'):
         sns.set_style(style)
-        self.colors = ['#2E86AB', '#A23B72', '#F18F01']  # Blue, Purple, Orange
-    
-    def plot_comparison(self, results, save_path=None):
-        """Create a comprehensive comparison plot"""
-        fig, axes = plt.subplots(2, 2, figsize=(14, 10))
-        fig.suptitle('Marine Propulsion System Comparison', fontsize=16, fontweight='bold')
+        sns.set_context("talk")  # Larger fonts for presentation
+        self.colors = ['#1f77b4', '#ff7f0e', '#2ca02c']  # Blue, Orange, Green
         
-        systems = [r['propulsion_system'] for r in results]
+    def plot_comparison_dashboard(self, results, save_path=None):
+        """Create comprehensive 2x2 comparison dashboard"""
+        fig, axes = plt.subplots(2, 2, figsize=(16, 12))
+        fig.suptitle('Propulsion System Comparison - Short-Sea Tanker', 
+                     fontsize=18, fontweight='bold', y=0.995)
         
-        # 1. Fuel Consumption
-        fuel_data = [r['total_fuel_consumption'] for r in results]
-        axes[0, 0].bar(systems, fuel_data, color=self.colors)
-        axes[0, 0].set_title('Total Fuel/Energy Consumption', fontweight='bold')
-        axes[0, 0].set_ylabel('Consumption (kg or kWh)')
+        configs = [r['configuration'] for r in results]
+        
+        # 1. Annual Fuel Consumption
+        fuel_data = [r['total_fuel_tonnes'] for r in results]
+        bars1 = axes[0, 0].bar(configs, fuel_data, color=self.colors, edgecolor='black', linewidth=1.5)
+        axes[0, 0].set_title('Annual Fuel/Energy Consumption', fontweight='bold', fontsize=14)
+        axes[0, 0].set_ylabel('Fuel Consumption (tonnes/year)', fontsize=12)
         axes[0, 0].tick_params(axis='x', rotation=15)
+        axes[0, 0].grid(axis='y', alpha=0.3)
         
-        # Add value labels on bars
-        for i, v in enumerate(fuel_data):
-            axes[0, 0].text(i, v + max(fuel_data)*0.02, f'{v:.0f}', 
-                           ha='center', va='bottom', fontweight='bold')
+        # Add value labels
+        for bar, val in zip(bars1, fuel_data):
+            height = bar.get_height()
+            axes[0, 0].text(bar.get_x() + bar.get_width()/2., height,
+                           f'{val:.0f}t', ha='center', va='bottom', 
+                           fontweight='bold', fontsize=11)
         
-        # 2. CO2 Emissions
-        emissions_data = [r['total_co2_emissions'] for r in results]
-        axes[0, 1].bar(systems, emissions_data, color=self.colors)
-        axes[0, 1].set_title('CO₂ Emissions', fontweight='bold')
-        axes[0, 1].set_ylabel('Emissions (kg CO₂)')
+        # 2. Annual CO2 Emissions
+        co2_data = [r['total_co2_tonnes'] for r in results]
+        bars2 = axes[0, 1].bar(configs, co2_data, color=self.colors, edgecolor='black', linewidth=1.5)
+        axes[0, 1].set_title('Annual CO2 Emissions', fontweight='bold', fontsize=14)
+        axes[0, 1].set_ylabel('CO2 Emissions (tonnes/year)', fontsize=12)
         axes[0, 1].tick_params(axis='x', rotation=15)
+        axes[0, 1].grid(axis='y', alpha=0.3)
         
-        for i, v in enumerate(emissions_data):
-            axes[0, 1].text(i, v + max(emissions_data)*0.02, f'{v:.0f}', 
-                           ha='center', va='bottom', fontweight='bold')
+        for bar, val in zip(bars2, co2_data):
+            height = bar.get_height()
+            axes[0, 1].text(bar.get_x() + bar.get_width()/2., height,
+                           f'{val:.0f}t', ha='center', va='bottom', 
+                           fontweight='bold', fontsize=11)
         
-        # 3. Operating Cost
-        cost_data = [r['total_voyage_cost'] for r in results]
-        axes[1, 0].bar(systems, cost_data, color=self.colors)
-        axes[1, 0].set_title('Total Voyage Cost (Fuel + Amortized Capital)', fontweight='bold')
-        axes[1, 0].set_ylabel('Cost ($)')
+        # 3. Total Annual Cost
+        cost_data = [r['total_annual_cost_usd'] / 1e6 for r in results]  # In millions
+        bars3 = axes[1, 0].bar(configs, cost_data, color=self.colors, edgecolor='black', linewidth=1.5)
+        axes[1, 0].set_title('Total Annual Operating Cost', fontweight='bold', fontsize=14)
+        axes[1, 0].set_ylabel('Annual Cost (Million USD)', fontsize=12)
         axes[1, 0].tick_params(axis='x', rotation=15)
+        axes[1, 0].grid(axis='y', alpha=0.3)
         
-        for i, v in enumerate(cost_data):
-            axes[1, 0].text(i, v + max(cost_data)*0.02, f'${v:.0f}', 
-                           ha='center', va='bottom', fontweight='bold')
+        for bar, val in zip(bars3, cost_data):
+            height = bar.get_height()
+            axes[1, 0].text(bar.get_x() + bar.get_width()/2., height,
+                           f'${val:.2f}M', ha='center', va='bottom', 
+                           fontweight='bold', fontsize=11)
         
-        # 4. Operational Phase Breakdown (stacked bar for first system as example)
-        if len(results) > 0:
-            breakdown = results[0]['breakdown']
-            phases = list(breakdown.keys())
-            fuel_by_phase = [breakdown[phase]['fuel'] for phase in phases]
-            
-            x_pos = np.arange(len(systems))
-            width = 0.6
-            
-            bottom = np.zeros(len(systems))
-            
-            for i, phase in enumerate(phases):
-                phase_data = [r['breakdown'][phase]['fuel'] for r in results]
-                axes[1, 1].bar(x_pos, phase_data, width, label=phase.capitalize(),
-                             bottom=bottom, color=self.colors[i % len(self.colors)])
-                bottom += phase_data
-            
-            axes[1, 1].set_title('Fuel Consumption by Operational Phase', fontweight='bold')
-            axes[1, 1].set_ylabel('Fuel (kg or kWh)')
-            axes[1, 1].set_xticks(x_pos)
-            axes[1, 1].set_xticklabels(systems, rotation=15)
-            axes[1, 1].legend()
+        # 4. Fuel Breakdown by Operational Mode (stacked bar)
+        sailing_fuel = [r['breakdown']['sailing']['fuel_kg']/1000 for r in results]
+        maneuvering_fuel = [r['breakdown']['maneuvering']['fuel_kg']/1000 for r in results]
+        port_fuel = [r['breakdown']['port']['fuel_kg']/1000 for r in results]
+        
+        x = np.arange(len(configs))
+        width = 0.6
+        
+        p1 = axes[1, 1].bar(x, sailing_fuel, width, label='Sailing (65%)', 
+                           color='#4CAF50', edgecolor='black', linewidth=1.5)
+        p2 = axes[1, 1].bar(x, maneuvering_fuel, width, bottom=sailing_fuel,
+                           label='Maneuvering (5%)', color='#FFC107', 
+                           edgecolor='black', linewidth=1.5)
+        p3 = axes[1, 1].bar(x, port_fuel, width, 
+                           bottom=[s+m for s,m in zip(sailing_fuel, maneuvering_fuel)],
+                           label='Port (30%)', color='#F44336', 
+                           edgecolor='black', linewidth=1.5)
+        
+        axes[1, 1].set_title('Fuel Consumption by Operational Mode', fontweight='bold', fontsize=14)
+        axes[1, 1].set_ylabel('Fuel Consumption (tonnes)', fontsize=12)
+        axes[1, 1].set_xticks(x)
+        axes[1, 1].set_xticklabels(configs, rotation=15)
+        axes[1, 1].legend(loc='upper right', fontsize=10)
+        axes[1, 1].grid(axis='y', alpha=0.3)
         
         plt.tight_layout()
         
         if save_path:
             plt.savefig(save_path, dpi=300, bbox_inches='tight')
+            print(f"✓ Saved: {save_path}")
         
         return fig
     
-    def plot_emissions_savings(self, results, baseline_idx=0):
-        """Plot emissions savings compared to baseline"""
-        fig, ax = plt.subplots(figsize=(10, 6))
+    def plot_emissions_reduction(self, results, baseline_idx=0, save_path=None):
+        """Plot CO₂ emissions reduction vs baseline"""
+        fig, ax = plt.subplots(figsize=(10, 7))
         
-        systems = [r['propulsion_system'] for r in results]
-        emissions = [r['total_co2_emissions'] for r in results]
+        configs = [r['configuration'] for r in results]
+        co2_reductions = [r['vs_baseline']['co2_reduction_pct'] for r in results]
         
-        baseline_emissions = emissions[baseline_idx]
-        savings = [(baseline_emissions - e) / baseline_emissions * 100 for e in emissions]
-        
-        colors_mapped = [self.colors[i % len(self.colors)] for i in range(len(systems))]
-        bars = ax.bar(systems, savings, color=colors_mapped)
+        bars = ax.bar(configs, co2_reductions, color=self.colors, 
+                     edgecolor='black', linewidth=2)
         
         # Color baseline differently
         bars[baseline_idx].set_color('#cccccc')
+        bars[baseline_idx].set_edgecolor('black')
         
-        ax.axhline(y=0, color='black', linestyle='-', linewidth=0.8)
-        ax.set_title('CO₂ Emissions Reduction vs Baseline', fontsize=14, fontweight='bold')
-        ax.set_ylabel('Emissions Reduction (%)', fontsize=12)
+        ax.axhline(y=0, color='black', linestyle='-', linewidth=1.5)
+        ax.set_title('CO2 Emissions Reduction vs Baseline\n(Conventional Diesel-Mechanical)', 
+                    fontsize=16, fontweight='bold', pad=20)
+        ax.set_ylabel('CO2 Reduction (%)', fontsize=13)
         ax.tick_params(axis='x', rotation=15)
         ax.grid(axis='y', alpha=0.3)
         
         # Add value labels
-        for i, (bar, val) in enumerate(zip(bars, savings)):
+        for i, (bar, val) in enumerate(zip(bars, co2_reductions)):
             height = bar.get_height()
-            label = 'Baseline' if i == baseline_idx else f'{val:.1f}%'
-            ax.text(bar.get_x() + bar.get_width()/2., height + (2 if height >= 0 else -5),
-                   label, ha='center', va='bottom' if height >= 0 else 'top', 
-                   fontweight='bold')
+            if i == baseline_idx:
+                label = 'Baseline'
+            else:
+                label = f'{val:.1f}%'
+            
+            y_pos = height + (3 if height >= 0 else -6)
+            ax.text(bar.get_x() + bar.get_width()/2., y_pos, label,
+                   ha='center', va='bottom' if height >= 0 else 'top', 
+                   fontweight='bold', fontsize=12)
         
         plt.tight_layout()
+        
+        if save_path:
+            plt.savefig(save_path, dpi=300, bbox_inches='tight')
+            print(f"✓ Saved: {save_path}")
+        
         return fig
     
-    def create_value_proposition(self, results, baseline_idx=0, years=10):
-        """Generate a value proposition summary"""
+    def plot_cost_breakdown(self, results, save_path=None):
+        """Plot cost breakdown: fuel vs capital"""
+        fig, ax = plt.subplots(figsize=(12, 7))
+        
+        configs = [r['configuration'] for r in results]
+        fuel_costs = [r['fuel_cost_usd'] / 1e6 for r in results]
+        capital_costs = [r['capital_cost_annual_usd'] / 1e6 for r in results]
+        
+        x = np.arange(len(configs))
+        width = 0.6
+        
+        p1 = ax.bar(x, fuel_costs, width, label='Fuel Cost', 
+                   color='#FF6B6B', edgecolor='black', linewidth=1.5)
+        p2 = ax.bar(x, capital_costs, width, bottom=fuel_costs,
+                   label='Amortized Capital Cost', color='#4ECDC4', 
+                   edgecolor='black', linewidth=1.5)
+        
+        ax.set_title('Annual Cost Breakdown', fontsize=16, fontweight='bold', pad=20)
+        ax.set_ylabel('Annual Cost (Million USD)', fontsize=13)
+        ax.set_xticks(x)
+        ax.set_xticklabels(configs, rotation=15)
+        ax.legend(fontsize=11, loc='upper left')
+        ax.grid(axis='y', alpha=0.3)
+        
+        # Add total labels on top
+        for i, (fc, cc) in enumerate(zip(fuel_costs, capital_costs)):
+            total = fc + cc
+            ax.text(i, total + 0.05, f'${total:.2f}M', 
+                   ha='center', va='bottom', fontweight='bold', fontsize=11)
+        
+        plt.tight_layout()
+        
+        if save_path:
+            plt.savefig(save_path, dpi=300, bbox_inches='tight')
+            print(f"✓ Saved: {save_path}")
+        
+        return fig
+    
+    def create_value_proposition_summary(self, results, baseline_idx=0):
+        """Generate text-based value proposition summary"""
         baseline = results[baseline_idx]
         
-        print("\n" + "="*70)
-        print("VALUE PROPOSITION SUMMARY".center(70))
-        print("="*70)
-        print(f"\nBaseline System: {baseline['propulsion_system']}")
-        print(f"Analysis Period: {years} years | 250 voyages/year\n")
+        print("\n" + "="*80)
+        print("VALUE PROPOSITION SUMMARY".center(80))
+        print("="*80)
+        print(f"\nVessel Type: Short-Sea Tanker")
+        print(f"Annual Operating Hours: 8,760 hours")
+        print(f"Baseline: {baseline['configuration']}")
+        print(f"  - Annual Fuel: {baseline['total_fuel_tonnes']:,.0f} tonnes")
+        print(f"  - Annual CO₂: {baseline['total_co2_tonnes']:,.0f} tonnes")
+        print(f"  - Annual Cost: ${baseline['total_annual_cost_usd']:,.0f}")
         
         for i, result in enumerate(results):
             if i == baseline_idx:
                 continue
             
-            print(f"\n{'─'*70}")
-            print(f"Alternative: {result['propulsion_system']}")
-            print(f"{'─'*70}")
+            print(f"\n{'─'*80}")
+            print(f"Configuration: {result['configuration']}")
+            print(f"{'─'*80}")
             
-            # Calculate per voyage differences
-            fuel_saving = baseline['total_fuel_consumption'] - result['total_fuel_consumption']
-            fuel_saving_pct = (fuel_saving / baseline['total_fuel_consumption']) * 100
+            # Calculate differences
+            fuel_saving_tonnes = baseline['total_fuel_tonnes'] - result['total_fuel_tonnes']
+            fuel_saving_pct = result['vs_baseline']['fuel_reduction_pct']
             
-            emissions_saving = baseline['total_co2_emissions'] - result['total_co2_emissions']
-            emissions_saving_pct = (emissions_saving / baseline['total_co2_emissions']) * 100
+            co2_saving_tonnes = baseline['total_co2_tonnes'] - result['total_co2_tonnes']
+            co2_saving_pct = result['vs_baseline']['co2_reduction_pct']
             
-            cost_diff = result['total_voyage_cost'] - baseline['total_voyage_cost']
+            cost_diff = result['total_annual_cost_usd'] - baseline['total_annual_cost_usd']
+            cost_diff_pct = result['vs_baseline']['cost_difference_pct']
             
-            # Annual calculations
-            annual_voyages = 250
-            annual_emissions_saving = emissions_saving * annual_voyages / 1000  # tonnes
-            annual_cost_diff = cost_diff * annual_voyages
+            print(f"\n📊 Annual Performance:")
+            print(f"   Fuel Consumption:     {result['total_fuel_tonnes']:>8,.0f} tonnes  ({fuel_saving_pct:>+6.1f}%)")
+            print(f"   CO₂ Emissions:        {result['total_co2_tonnes']:>8,.0f} tonnes  ({co2_saving_pct:>+6.1f}%)")
+            print(f"   Total Annual Cost:    ${result['total_annual_cost_usd']:>8,.0f}  ({cost_diff_pct:>+6.1f}%)")
             
-            # Lifetime calculations
-            lifetime_emissions_saving = annual_emissions_saving * years
-            lifetime_cost_diff = annual_cost_diff * years
+            print(f"\n💰 Economic Impact:")
+            print(f"   Additional Capital Cost:  ${cost_diff:>10,.0f} per year")
+            print(f"   Fuel Cost Savings:        ${baseline['fuel_cost_usd'] - result['fuel_cost_usd']:>10,.0f} per year")
             
-            print(f"\n📊 Per Voyage Comparison:")
-            print(f"   Fuel/Energy Reduction:  {fuel_saving:>10.1f} kg  ({fuel_saving_pct:>6.1f}%)")
-            print(f"   CO₂ Reduction:          {emissions_saving:>10.1f} kg  ({emissions_saving_pct:>6.1f}%)")
-            print(f"   Cost Difference:        ${cost_diff:>10.2f}")
+            print(f"\n🌍 Environmental Impact (20-year lifecycle):")
+            print(f"   Total CO₂ Avoided:        {co2_saving_tonnes * 20:>10,.0f} tonnes")
+            print(f"   Equivalent to removing    {co2_saving_tonnes * 20 / 4.6:>10,.0f} cars from road for 1 year")
             
-            print(f"\n📅 Annual Impact (250 voyages):")
-            print(f"   CO₂ Avoided:            {annual_emissions_saving:>10.1f} tonnes")
-            print(f"   Cost Impact:            ${annual_cost_diff:>10,.0f}")
+            # ROI analysis
+            capital_diff = result['capital_cost_annual_usd'] - baseline['capital_cost_annual_usd']
+            fuel_savings = baseline['fuel_cost_usd'] - result['fuel_cost_usd']
+            net_annual_impact = fuel_savings - capital_diff
             
-            print(f"\n🌍 {years}-Year Lifecycle Impact:")
-            print(f"   Total CO₂ Avoided:      {lifetime_emissions_saving:>10,.0f} tonnes")
-            print(f"   Total Cost Impact:      ${lifetime_cost_diff:>10,.0f}")
-            
-            # Equivalent context
-            print(f"\n💡 Context:")
-            print(f"   CO₂ savings equivalent to removing {lifetime_emissions_saving/4.6:.0f} cars")
-            print(f"   from the road for one year")
-            
-            # ROI calculation
-            if cost_diff < 0:
-                payback_years = "Immediate savings"
+            if net_annual_impact > 0:
+                print(f"\n✅ Net Annual Savings:     ${net_annual_impact:>10,.0f}")
             else:
-                if annual_cost_diff > 0:
-                    payback_years = f"Never (higher operating cost)"
-                else:
-                    payback_years = "N/A"
-            
-            print(f"   Payback Period:         {payback_years}")
+                print(f"\n⚠️  Net Annual Cost:       ${abs(net_annual_impact):>10,.0f}")
         
-        print("\n" + "="*70 + "\n")
+        print("\n" + "="*80 + "\n")
     
-    def plot_sensitivity_analysis(self, base_results, parameter_name='fuel_price'):
-        """Simple sensitivity analysis visualization"""
-        fig, ax = plt.subplots(figsize=(10, 6))
+    def export_summary_table(self, results):
+        """Create summary table for presentation"""
+        print("\n" + "="*100)
+        print("SUMMARY COMPARISON TABLE")
+        print("="*100)
+        print(f"{'Configuration':<30} {'Fuel (t/y)':<12} {'CO₂ (t/y)':<12} {'Cost ($/y)':<15} {'vs Baseline':<20}")
+        print("-"*100)
         
-        # This is a placeholder for more advanced sensitivity analysis
-        # You could vary fuel prices, operating hours, etc.
+        for i, r in enumerate(results):
+            baseline_str = "BASELINE" if r['vs_baseline']['is_baseline'] else f"CO₂: {r['vs_baseline']['co2_reduction_pct']:+.1f}%"
+            
+            print(f"{r['configuration']:<30} "
+                  f"{r['total_fuel_tonnes']:<12,.0f} "
+                  f"{r['total_co2_tonnes']:<12,.0f} "
+                  f"${r['total_annual_cost_usd']:<14,.0f} "
+                  f"{baseline_str:<20}")
         
-        systems = [r['propulsion_system'] for r in base_results]
-        base_costs = [r['total_voyage_cost'] for r in base_results]
-        
-        # Simulate +/- 20% fuel price variation
-        variations = [-0.2, -0.1, 0, 0.1, 0.2]
-        
-        for i, system in enumerate(systems):
-            base_cost = base_costs[i]
-            varied_costs = [base_cost * (1 + v * 0.5) for v in variations]  # Simplified
-            ax.plot([v*100 for v in variations], varied_costs, 
-                   marker='o', label=system, linewidth=2)
-        
-        ax.set_xlabel('Fuel Price Variation (%)', fontsize=12)
-        ax.set_ylabel('Total Voyage Cost ($)', fontsize=12)
-        ax.set_title('Sensitivity to Fuel Price Changes', fontsize=14, fontweight='bold')
-        ax.legend()
-        ax.grid(alpha=0.3)
-        
-        plt.tight_layout()
-        return fig
+        print("="*100 + "\n")
+
+
+if __name__ == "__main__":
+    # Test visualization with mock data
+    print("Testing visualization module...")
+    
+    # Mock results for testing
+    mock_results = [
+        {
+            'configuration': 'Diesel-Mechanical',
+            'total_fuel_tonnes': 1200,
+            'total_co2_tonnes': 3850,
+            'total_annual_cost_usd': 2500000,
+            'fuel_cost_usd': 780000,
+            'capital_cost_annual_usd': 1720000,
+            'breakdown': {
+                'sailing': {'fuel_kg': 900000},
+                'maneuvering': {'fuel_kg': 200000},
+                'port': {'fuel_kg': 100000}
+            },
+            'vs_baseline': {'co2_reduction_pct': 0, 'is_baseline': True}
+        },
+        {
+            'configuration': 'Dual-Fuel LNG',
+            'total_fuel_tonnes': 1050,
+            'total_co2_tonnes': 2900,
+            'total_annual_cost_usd': 2800000,
+            'fuel_cost_usd': 420000,
+            'capital_cost_annual_usd': 2380000,
+            'breakdown': {
+                'sailing': {'fuel_kg': 800000},
+                'maneuvering': {'fuel_kg': 180000},
+                'port': {'fuel_kg': 70000}
+            },
+            'vs_baseline': {'co2_reduction_pct': 24.7, 'is_baseline': False}
+        }
+    ]
+    
+    viz = SimulationVisualizer()
+    viz.export_summary_table(mock_results)
+    print("✓ Visualization module ready")

@@ -1,209 +1,164 @@
-#!/usr/bin/env python3
-"""
-Marine Propulsion System Simulator
-Compares different propulsion configurations for marine vessels
-"""
-
 import os
+import sys
 from datetime import datetime
 from src.database import VesselDatabase
 from src.simulator import VoyageSimulator
 from src.visualizer import SimulationVisualizer
 
 def main():
-    print("\n" + "="*70)
-    print("MARINE PROPULSION SYSTEM SIMULATOR".center(70))
-    print("="*70 + "\n")
+    """Run complete simulation and generate all outputs"""
     
-    # Initialize database
-    print("📊 Initializing database...")
+    print("\n" + "="*80)
+    print("SHORT-SEA TANKER PROPULSION SYSTEM COMPARISON".center(80))
+    print("Wärtsilä Marine Systems Simulation Study".center(80))
+    print("="*80 + "\n")
+    
+    # Create output directory
     os.makedirs('data', exist_ok=True)
     os.makedirs('outputs', exist_ok=True)
+    
+    # Initialize database
+    print("📊 Step 1: Initializing database with real Wärtsilä engine data...")
     db = VesselDatabase()
     
-    # Load data
-    propulsion_systems = db.get_propulsion_systems()
-    operating_profiles = db.get_operating_profiles()
+    # Load configurations and profile
+    configs = db.get_propulsion_systems()
+    profile = db.get_profile(1).to_dict()
     
-    print(f"✓ Loaded {len(propulsion_systems)} propulsion systems")
-    print(f"✓ Loaded {len(operating_profiles)} operating profiles\n")
+    print(f"   ✓ Loaded {len(configs)} propulsion configurations")
+    print(f"   ✓ Operational profile: {profile['profile_name']}")
+    print(f"   ✓ Annual operating hours: {profile['sailing_hours'] + profile['maneuvering_hours'] + profile['port_hours']:.0f}\n")
     
-    # Display available systems
-    print("Available Propulsion Systems:")
-    for _, system in propulsion_systems.iterrows():
-        print(f"  • {system['name']} ({system['type']})")
+    # Display configurations
+    print("Configurations to be evaluated:")
+    for _, config in configs.iterrows():
+        print(f"\n   {config['name']}:")
+        if config['main_engine_model']:
+            print(f"      Main: {config['main_engine_model']} ({config['main_engine_power']:.0f} kW)")
+        if config['aux_engine_model']:
+            count = config['aux_engine_count'] if config['aux_engine_count'] else 0
+            print(f"      Aux:  {count}× {config['aux_engine_model']} ({config['aux_engine_power']:.0f} kW each)")
+        if config['battery_capacity']:
+            print(f"      Battery: {config['battery_capacity']:.0f} kWh")
     
-    print("\nAvailable Operating Profiles:")
-    for _, profile in operating_profiles.iterrows():
-        print(f"  • {profile['profile_name']}")
+    print("\n" + "-"*80 + "\n")
     
-    # Select profile for simulation (using first one)
-    selected_profile = operating_profiles.iloc[0].to_dict()
-    print(f"\n🚢 Simulating: {selected_profile['profile_name']}")
-    print(f"   Duration: {selected_profile['cruising_hours'] + selected_profile['maneuvering_hours'] + selected_profile['port_hours']:.1f} hours")
-    
-    # Run simulation
-    print("\n⚙️  Running simulations...")
-    simulator = VoyageSimulator(vessel_power_kw=5000)
-    results = simulator.compare_systems(propulsion_systems, selected_profile)
-    
-    print("✓ Simulations complete\n")
+    # Run simulations
+    print("⚙️  Step 2: Running voyage simulations...")
+    simulator = VoyageSimulator()
+    results = simulator.compare_configurations(configs, profile)
+    results = simulator.calculate_relative_performance(results, baseline_idx=0)
+    print("   ✓ Simulations complete\n")
     
     # Save results to database
+    print("💾 Step 3: Saving results to database...")
     timestamp = datetime.now().isoformat()
     for result in results:
         db.save_simulation_result((
             timestamp,
-            result['system_id'],
-            result['profile_id'],
-            result['total_fuel_consumption'],
-            result['total_co2_emissions'],
-            result['total_voyage_cost']
+            result['config_id'],
+            1,  # profile_id
+            result['total_fuel_kg'],
+            result['total_co2_tonnes'],
+            result['total_sox_tonnes'],
+            result['fuel_cost_usd'],
+            result['capital_cost_annual_usd'],
+            result['total_annual_cost_usd'],
+            result['breakdown']['sailing']['fuel_kg'],
+            result['breakdown']['maneuvering']['fuel_kg'],
+            result['breakdown']['port']['fuel_kg']
         ))
+    print("   ✓ Results saved\n")
     
-    print("💾 Results saved to database")
-    
-    # Visualize results
-    print("\n📈 Generating visualizations...")
+    # Generate visualizations
+    print("📈 Step 4: Generating visualizations...")
     visualizer = SimulationVisualizer()
     
-    # Main comparison plot
-    fig1 = visualizer.plot_comparison(results, save_path='outputs/comparison.png')
-    print("✓ Saved: outputs/comparison.png")
+    # Main comparison dashboard
+    fig1 = visualizer.plot_comparison_dashboard(
+        results, 
+        save_path='outputs/comparison_dashboard.png'
+    )
     
-    # Emissions savings plot
-    fig2 = visualizer.plot_emissions_savings(results, baseline_idx=0)
-    fig2.savefig('outputs/emissions_savings.png', dpi=300, bbox_inches='tight')
-    print("✓ Saved: outputs/emissions_savings.png")
+    # Emissions reduction chart
+    fig2 = visualizer.plot_emissions_reduction(
+        results, 
+        baseline_idx=0,
+        save_path='outputs/emissions_reduction.png'
+    )
     
-    # Sensitivity analysis
-    fig3 = visualizer.plot_sensitivity_analysis(results)
-    fig3.savefig('outputs/sensitivity.png', dpi=300, bbox_inches='tight')
-    print("✓ Saved: outputs/sensitivity.png")
+    # Cost breakdown
+    fig3 = visualizer.plot_cost_breakdown(
+        results,
+        save_path='outputs/cost_breakdown.png'
+    )
     
-    # Generate value proposition
-    visualizer.create_value_proposition(results, baseline_idx=0, years=10)
+    print("   ✓ All visualizations generated\n")
     
-    # Print summary table
-    print("\n📋 Simulation Results Summary:")
-    print("-" * 90)
-    print(f"{'System':<30} {'Fuel (kg)':<15} {'CO₂ (kg)':<15} {'Cost ($)':<15}")
-    print("-" * 90)
+    # Display results
+    print("="*80)
+    print("SIMULATION RESULTS")
+    print("="*80)
+    
+    visualizer.export_summary_table(results)
+    
+    # Detailed breakdown
+    print("\nDETAILED RESULTS BY CONFIGURATION:")
+    print("="*80)
+    
     for result in results:
-        print(f"{result['propulsion_system']:<30} "
-              f"{result['total_fuel_consumption']:<15.1f} "
-              f"{result['total_co2_emissions']:<15.1f} "
-              f"{result['total_voyage_cost']:<15.2f}")
-    print("-" * 90 + "\n")
+        print(f"\n{result['configuration']}")
+        print("-"*80)
+        print(f"  Annual Fuel Consumption:   {result['total_fuel_tonnes']:>10,.1f} tonnes")
+        print(f"  Annual CO₂ Emissions:      {result['total_co2_tonnes']:>10,.1f} tonnes")
+        print(f"  Annual SOx Emissions:      {result['total_sox_tonnes']:>10,.2f} tonnes")
+        print(f"\n  Fuel Cost:                 ${result['fuel_cost_usd']:>10,.0f}")
+        print(f"  Amortized Capital Cost:    ${result['capital_cost_annual_usd']:>10,.0f}")
+        print(f"  Total Annual Cost:         ${result['total_annual_cost_usd']:>10,.0f}")
+        
+        print(f"\n  Fuel Breakdown:")
+        print(f"    Sailing:      {result['breakdown']['sailing']['fuel_kg']/1000:>6.1f} tonnes ({result['breakdown']['sailing']['percentage']:>5.1f}%)")
+        print(f"    Maneuvering:  {result['breakdown']['maneuvering']['fuel_kg']/1000:>6.1f} tonnes ({result['breakdown']['maneuvering']['percentage']:>5.1f}%)")
+        print(f"    Port:         {result['breakdown']['port']['fuel_kg']/1000:>6.1f} tonnes ({result['breakdown']['port']['percentage']:>5.1f}%)")
+        
+        if not result['vs_baseline']['is_baseline']:
+            print(f"\n  Performance vs Baseline:")
+            print(f"    Fuel Reduction:  {result['vs_baseline']['fuel_reduction_pct']:>10.1f}%")
+            print(f"    CO₂ Reduction:   {result['vs_baseline']['co2_reduction_pct']:>10.1f}%")
+            print(f"    Cost Difference: {result['vs_baseline']['cost_difference_pct']:>+10.1f}%")
+    
+    print("\n" + "="*80 + "\n")
+    
+    # Value proposition summary
+    print("📊 Step 5: Generating value proposition summary...\n")
+    visualizer.create_value_proposition_summary(results, baseline_idx=0)
+    
+    # Summary
+    print("="*80)
+    print("SUMMARY")
+    print("="*80)
+    print("\n✅ Simulation Complete!")
+    print(f"\n   Configurations evaluated: {len(results)}")
+    print(f"   Outputs generated:")
+    print(f"      • outputs/comparison_dashboard.png")
+    print(f"      • outputs/emissions_reduction.png")
+    print(f"      • outputs/cost_breakdown.png")
+    print(f"      • Database: data/vessel_data.db")
+    
+    print("\n" + "="*80 + "\n")
     
     # Close database
     db.close()
     
-    print("✅ Analysis complete! Check the outputs/ folder for visualizations.\n")
+    return results
+
 
 if __name__ == "__main__":
-    main()#!/usr/bin/env python3
-"""
-Marine Propulsion System Simulator
-Compares different propulsion configurations for marine vessels
-"""
-
-import os
-from datetime import datetime
-from src.database import VesselDatabase
-from src.simulator import VoyageSimulator
-from src.visualizer import SimulationVisualizer
-
-def main():
-    print("\n" + "="*70)
-    print("MARINE PROPULSION SYSTEM SIMULATOR".center(70))
-    print("="*70 + "\n")
-    
-    # Initialize database
-    print("📊 Initializing database...")
-    os.makedirs('data', exist_ok=True)
-    os.makedirs('outputs', exist_ok=True)
-    db = VesselDatabase()
-    
-    # Load data
-    propulsion_systems = db.get_propulsion_systems()
-    operating_profiles = db.get_operating_profiles()
-    
-    print(f"✓ Loaded {len(propulsion_systems)} propulsion systems")
-    print(f"✓ Loaded {len(operating_profiles)} operating profiles\n")
-    
-    # Display available systems
-    print("Available Propulsion Systems:")
-    for _, system in propulsion_systems.iterrows():
-        print(f"  • {system['name']} ({system['type']})")
-    
-    print("\nAvailable Operating Profiles:")
-    for _, profile in operating_profiles.iterrows():
-        print(f"  • {profile['profile_name']}")
-    
-    # Select profile for simulation (using first one)
-    selected_profile = operating_profiles.iloc[0].to_dict()
-    print(f"\n🚢 Simulating: {selected_profile['profile_name']}")
-    print(f"   Duration: {selected_profile['cruising_hours'] + selected_profile['maneuvering_hours'] + selected_profile['port_hours']:.1f} hours")
-    
-    # Run simulation
-    print("\n⚙️  Running simulations...")
-    simulator = VoyageSimulator(vessel_power_kw=5000)
-    results = simulator.compare_systems(propulsion_systems, selected_profile)
-    
-    print("✓ Simulations complete\n")
-    
-    # Save results to database
-    timestamp = datetime.now().isoformat()
-    for result in results:
-        db.save_simulation_result((
-            timestamp,
-            result['system_id'],
-            result['profile_id'],
-            result['total_fuel_consumption'],
-            result['total_co2_emissions'],
-            result['total_voyage_cost']
-        ))
-    
-    print("💾 Results saved to database")
-    
-    # Visualize results
-    print("\n📈 Generating visualizations...")
-    visualizer = SimulationVisualizer()
-    
-    # Main comparison plot
-    fig1 = visualizer.plot_comparison(results, save_path='outputs/comparison.png')
-    print("✓ Saved: outputs/comparison.png")
-    
-    # Emissions savings plot
-    fig2 = visualizer.plot_emissions_savings(results, baseline_idx=0)
-    fig2.savefig('outputs/emissions_savings.png', dpi=300, bbox_inches='tight')
-    print("✓ Saved: outputs/emissions_savings.png")
-    
-    # Sensitivity analysis
-    fig3 = visualizer.plot_sensitivity_analysis(results)
-    fig3.savefig('outputs/sensitivity.png', dpi=300, bbox_inches='tight')
-    print("✓ Saved: outputs/sensitivity.png")
-    
-    # Generate value proposition
-    visualizer.create_value_proposition(results, baseline_idx=0, years=10)
-    
-    # Print summary table
-    print("\n📋 Simulation Results Summary:")
-    print("-" * 90)
-    print(f"{'System':<30} {'Fuel (kg)':<15} {'CO₂ (kg)':<15} {'Cost ($)':<15}")
-    print("-" * 90)
-    for result in results:
-        print(f"{result['propulsion_system']:<30} "
-              f"{result['total_fuel_consumption']:<15.1f} "
-              f"{result['total_co2_emissions']:<15.1f} "
-              f"{result['total_voyage_cost']:<15.2f}")
-    print("-" * 90 + "\n")
-    
-    # Close database
-    db.close()
-    
-    print("✅ Analysis complete! Check the outputs/ folder for visualizations.\n")
-
-if __name__ == "__main__":
-    main()
+    try:
+        results = main()
+        sys.exit(0)
+    except Exception as e:
+        print(f"\n❌ Error: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        sys.exit(1)
