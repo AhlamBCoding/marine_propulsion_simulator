@@ -3,10 +3,6 @@
 
 A Python-based simulation tool for comparing marine propulsion configurations using real Wärtsilä engine data.
 
-**Developed for:** Wärtsilä System Simulation Team Interview  
-**Author:** Ahlam Fazlu Rahman  
-**Date:** January 2026
-
 ---
 
 ## Overview
@@ -212,43 +208,6 @@ Potential enhancements:
 
 ---
 
-## For Presentation
-
-**Key talking points:**
-
-1. **Real Wärtsilä Data**: All SFOC values from actual engines
-2. **Modular Design**: Easy to add new configurations or fuels
-3. **Decision Support**: Translates technical data to business value
-4. **Transparent**: All assumptions documented and adjustable
-5. **Practical**: Answers "Which configuration for this vessel?"
-
-**Demo flow:**
-1. Show operational profile (2 min)
-2. Explain configurations (2 min)
-3. Run `demo.py` (1 min)
-4. Present results (3 min)
-5. Discuss methodology (2 min)
-
----
-
-## Contact
-
-**Author:** Ahlam Fazlu Rahman  
-**Email:** ahlambanu.univ@gmail.com  
-**LinkedIn:** linkedin.com/in/ahlam-fazlu-rahman  
-**GitHub:** github.com/AhlamBCoding
-
----
-
 ## License
 
-Created for Wärtsilä Marine Systems interview process.  
-Educational and demonstration purposes.
-
----
-
-## Acknowledgments
-
-- Wärtsilä for engine configurator data
-- Lorenzo Brigati (Team Leader System Simulation) for assignment parameters
-- IMO for emission factor guidelines
+Created for Marine Systems process, Educational and demonstration purposes.
