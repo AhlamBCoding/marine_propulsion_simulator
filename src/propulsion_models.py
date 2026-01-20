@@ -87,7 +87,7 @@ class DualFuelLNGPropulsion(PropulsionSystem):
       - Gas mode: SFOC 149.0 g/kWh
       - Diesel mode: SFOC 176.9 g/kWh
     - Aux: 2× Wärtsilä 8L20DF (1280 kW)
-      - Gas mode: SFOC 172.0 g/kWh
+      - Gas mode: SFOC 163.2 g/kWh
     - Operation: 95% LNG, 5% MDO backup
     """
     

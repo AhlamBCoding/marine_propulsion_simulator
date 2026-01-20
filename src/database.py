@@ -182,7 +182,7 @@ class VesselDatabase:
                 'Wärtsilä 8L20DF',
                 1280.0,
                 2,
-                172.0,             -- aux SFOC in gas mode @ 85% (calculated)
+                163.2,             -- aux SFOC in gas mode @ 85% (calculated)
                 
                 149.0,             -- sfoc_gas (main engine)
                 176.9,             -- sfoc_diesel (LFO mode)
