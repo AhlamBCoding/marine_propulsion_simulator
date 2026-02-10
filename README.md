@@ -180,14 +180,14 @@ All SFOC values from:
 
 ## Assumptions & Limitations
 
-✅ **Assumptions:**
+**Assumptions:**
 - SFOC constant at 85% load (simplified)
 - Dual-fuel operates 95% on LNG, 5% on MDO
 - Hybrid battery covers 3 hours of port operations
 - 20-year economic lifespan
 - No fuel price escalation
 
-⚠️ **Limitations:**
+**Limitations:**
 - Simplified part-load efficiency curves
 - Does not model dynamic transients
 - Weather impact not included
