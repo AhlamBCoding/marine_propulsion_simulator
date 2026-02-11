@@ -1,0 +1,66 @@
+exclude_dirs:
+  - /venv/
+  - /env/
+  - /tests/
+
+tests:
+  - B201  # Flask debug mode
+  - B301  # Pickle usage
+  - B302  # marshal usage
+  - B303  # MD5 or SHA1 usage
+  - B304  # Insecure cipher usage
+  - B305  # Insecure cipher mode usage
+  - B306  # tempfile usage
+  - B307  # eval usage
+  - B308  # mark_safe usage
+  - B309  # HTTPSConnection usage
+  - B310  # urllib usage
+  - B311  # Random usage
+  - B312  # telnetlib usage
+  - B313  # xml.etree usage
+  - B314  # xml.etree usage
+  - B315  # xml.etree usage
+  - B316  # xml.etree usage
+  - B317  # xml.etree usage
+  - B318  # xml.etree usage
+  - B319  # xml.etree usage
+  - B320  # xml.etree usage
+  - B321  # FTP usage
+  - B322  # input usage
+  - B323  # unverified context
+  - B324  # hashlib usage
+  - B325  # tempfile usage
+  - B401  # import telnetlib
+  - B402  # import ftplib
+  - B403  # import pickle
+  - B404  # import subprocess
+  - B405  # import xml.etree
+  - B406  # import xml.sax
+  - B407  # import xml.expat
+  - B408  # import xml.minidom
+  - B409  # import xml.pulldom
+  - B410  # import lxml
+  - B411  # import xmlrpclib
+  - B412  # import httpoxy
+  - B413  # import pycrypto
+  - B501  # request without cert validation
+  - B502  # ssl with bad version
+  - B503  # ssl with bad defaults
+  - B504  # ssl with no version
+  - B505  # weak cryptographic key
+  - B506  # yaml load
+  - B507  # ssh no host key verification
+  - B601  # paramiko usage
+  - B602  # shell usage
+  - B603  # subprocess without shell
+  - B604  # any shell usage
+  - B605  # shell usage
+  - B606  # process without shell
+  - B607  # start process with partial path
+  - B608  # SQL injection
+  - B609  # wildcard injection
+  - B610  # SQL injection
+  - B611  # SQL injection
+  - B701  # jinja2 autoescape false
+  - B702  # use of mako templates
+  - B703  # django mark safe
