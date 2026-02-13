@@ -142,12 +142,12 @@ jobs:
     steps:
     - name: Security Scan Complete
       run: |
-        echo "🔒 Security scanning pipeline completed"
-        echo "✅ SAST: ${{ needs.sast-scan.result }}"
-        echo "✅ Dependency Scan: ${{ needs.dependency-scan.result }}"
-        echo "✅ Secret Scan: ${{ needs.secret-scan.result }}"
-        echo "✅ Container Scan: ${{ needs.container-scan.result }}"
-        echo "✅ Dockerfile Scan: ${{ needs.dockerfile-scan.result }}"
+        echo "Security scanning pipeline completed"
+        echo " SAST: ${{ needs.sast-scan.result }}"
+        echo " Dependency Scan: ${{ needs.dependency-scan.result }}"
+        echo " Secret Scan: ${{ needs.secret-scan.result }}"
+        echo " Container Scan: ${{ needs.container-scan.result }}"
+        echo " Dockerfile Scan: ${{ needs.dockerfile-scan.result }}"
     
     - name: Check for failures
       if: |
